@@ -64,10 +64,12 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'call.update', 'guard_name' => 'web', 'description' => 'Actualizar Registros', 'module_key' => 'cat']);
         Permission::firstOrCreate(['name' => 'call.delete', 'guard_name' => 'web', 'description' => 'Eliminar Registros', 'module_key' => 'cat']);
 
-        Permission::firstOrCreate(['name' => 'event.index',  'guard_name' => 'web', 'description' => 'Leer eventos',     'module_key' => 'cat']);
-        Permission::firstOrCreate(['name' => 'event.store',  'guard_name' => 'web', 'description' => 'Crear eventos',    'module_key' => 'cat']);
-        Permission::firstOrCreate(['name' => 'event.update', 'guard_name' => 'web', 'description' => 'Actualizar eventos','module_key' => 'cat']);
-        Permission::firstOrCreate(['name' => 'event.delete', 'guard_name' => 'web', 'description' => 'Eliminar eventos', 'module_key' => 'cat']);
+        Permission::firstOrCreate(['name' => 'event.indexx',  'guard_name' => 'web', 'description' => 'Leer eventos',     'module_key' => 'cat']);
+        Permission::firstOrCreate(['name' => 'event.storee',  'guard_name' => 'web', 'description' => 'Crear eventos',    'module_key' => 'cat']);
+        Permission::firstOrCreate(['name' => 'event.updatee', 'guard_name' => 'web', 'description' => 'Actualizar eventos','module_key' => 'cat']);
+        Permission::firstOrCreate(['name' => 'event.deletee', 'guard_name' => 'web', 'description' => 'Eliminar eventos', 'module_key' => 'cat']);
+
+        Permission::firstOrCreate(['name' => 'event-review.index', 'guard_name' => 'web', 'description' => 'aceptar o rechazar eventos', 'module_key' => 'cat']);
 
 
         // DIVULGACION

@@ -29,4 +29,12 @@ class Event extends Model
             ->withTimestamps();
     }
 
+    public function revisiones()
+    {
+        return $this->belongsToMany(User::class, 'event_reviewer', 'event_id', 'reviewer_id')
+            ->withPivot(['tipo', 'estatus', 'comentario'])
+            ->withTimestamps();
+    }
+
+
 }

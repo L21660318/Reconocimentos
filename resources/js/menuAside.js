@@ -14,6 +14,7 @@ import {
     mdiFileDocumentCheck,
     mdiReceiptText,
     mdiCalendar,
+    mdiClipboardCheck,
 } from "@mdi/js";
 // import Icon from '@mdi/react';
 
@@ -114,5 +115,13 @@ export default [
         icon: mdiBook,
         permission: "article.index",
     },
+
+    {
+        route: "event-review.index",
+        label: "Revisión de eventos",
+        icon: mdiClipboardCheck,
+        permission: "event-review.index", // si usas permisos de spatie
+    },
+    
     
 ];

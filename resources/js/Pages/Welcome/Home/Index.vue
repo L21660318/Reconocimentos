@@ -29,7 +29,7 @@ const props = defineProps({
     <LayoutWelcome>
         <HeroSection>
             <template #title>
-                Congreso Internacional de Tecnología y Ciencia Aplicada
+                Fer Preciosa
             </template>
             <template #description>
                 Divulgación de la tecnología y ciencia aplicada en la solución de problemas como soberanía en salud,

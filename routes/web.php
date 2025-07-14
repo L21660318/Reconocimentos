@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventReviewController;
+
 
 
 /*
@@ -67,7 +69,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('event', EventController::class)->parameters(['event' => 'event']);
     Route::get('event/{event}/assign-users', [EventController::class, 'assignUsers'])->name('event.assignUsers');
     Route::post('event/{event}/assign-users', [EventController::class, 'storeAssignedUsers'])->name('event.storeUsers');
-
+    Route::middleware(['auth'])->group(function () {
+        Route::get('event-review', [EventReviewController::class, 'index'])->name('event-review.index');
+        Route::get('event-review/{event}/edit', [EventReviewController::class, 'edit'])->name('event-review.edit');
+        Route::put('event-review/{event}', [EventReviewController::class, 'update'])->name('event-review.update');
+    });
+    
 
     //
     Route::resource('article', ArticleController::class)->parameters(['article' => 'article']);
