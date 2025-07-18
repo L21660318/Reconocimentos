@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Event;
+
 
 class WelcomeController extends Controller
 {
@@ -19,38 +21,23 @@ class WelcomeController extends Controller
         $this->source    = "Welcome/";
     }
 
-    public function welcome(Request $request): Response
+   public function welcome(Request $request)
     {
-        $query = Call::query()->with('files');
-        $query = $query->orderBy('created_at', 'desc');
-        $query->where('status', true);
-        $query->when($request->input('search'), function ($query, $search) {
-            if ($search != '') {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery->where('title', 'LIKE', '%' . $search . '%')
-                        ->orWhere('description', 'LIKE', '%' . $search . '%')
-                        ->orWhere('start_date', 'LIKE', '%' . $search . '%')
-                        ->orWhere('end_date', 'LIKE', '%' . $search . '%')
-                        ->orWhereHas('institution', function ($subQuery) use ($search) {
-                            $subQuery->where('name', 'LIKE', '%' . $search . '%');
-                        });
-                });
-            }
-        });
-        $calls = $query->paginate(3)->through(
-            function ($call) {
-                return $call->transform();
-            }
-        );
-        return Inertia::render("{$this->source}Home/Index", [
-            'title'   => 'Bienvenido',
-            'routeName' => $this->routeName,
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'calls' => $calls,
-            'search' => $request->search ?? '',
+        $search = $request->input('search');
+
+        $events = Event::with('institution')
+            ->when($search, function ($query, $search) {
+                $query->where('nombre', 'like', "%$search%");
+            })
+            ->paginate(6);
+
+        return Inertia::render('Welcome/Home/Index', [
+            'title' => 'Eventos',
+            'search' => $search,
+            'events' => $events,
         ]);
     }
+
 
     public function committee()
     {
@@ -75,4 +62,18 @@ class WelcomeController extends Controller
             'routeName' => $this->routeName,
         ]);
     }
+
+    public function events(Request $request)
+    {
+        $events = Event::query()
+            ->when($request->search, fn($q, $search) => $q->where('nombre', 'like', "%{$search}%"))
+            ->paginate(9)
+            ->withQueryString();
+
+        return Inertia::render('Welcome/Event', [
+            'events' => $events,
+            'search' => $request->search ?? '',
+        ]);
+    }
+
 }

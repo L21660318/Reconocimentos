@@ -1,6 +1,6 @@
 <script setup>
 import HeadLogo from '@/Components/HeadLogo.vue';
-import Calls from './Partials/Calls/Calls.vue';
+import Events from './Partials/Events/Events.vue';
 import HeroSection from './Partials/HeroSection.vue';
 import LayoutWelcome from '@/Layouts/LayoutWelcome.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -15,11 +15,16 @@ const props = defineProps({
         type: Object,
         required: true
     },
+    events:{
+        type: Object,
+        required: true
+    },
     search: { type: String, required: true },
     title: {
         type: String,
         required: true
     }
+    
 });
 
 </script>
@@ -38,6 +43,6 @@ const props = defineProps({
             </template>
         </HeroSection>
         
-        <Calls :calls="calls" :search="search" />
+        <Events :events="events" :search="search" />
     </LayoutWelcome>
 </template>

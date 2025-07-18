@@ -71,6 +71,16 @@ class PermissionSeeder extends Seeder
 
         Permission::firstOrCreate(['name' => 'event-review.index', 'guard_name' => 'web', 'description' => 'aceptar o rechazar eventos', 'module_key' => 'cat']);
 
+        Permission::firstOrCreate([
+            'name' => 'certificate.index',
+            'guard_name' => 'web',
+            'description' => 'Ver certificados',
+            'module_key' => 'cat',
+        ]);
+        Permission::firstOrCreate(['name' => 'certificate.show', 'guard_name' => 'web', 'description' => 'Ver certificado', 'module_key' => 'cat']);
+        Permission::firstOrCreate(['name' => 'certificate.store', 'guard_name' => 'web', 'description' => 'Crear certificado', 'module_key' => 'cat']);
+
+
 
         // DIVULGACION
         Permission::firstOrCreate(['name' => 'article.index', 'guard_name' => 'web', 'description' => 'Leer Registros', 'module_key' => 'div']);

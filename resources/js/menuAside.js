@@ -106,6 +106,13 @@ export default [
                 icon: mdiCalendar,
                 permission: "event.index",
             },
+
+            {
+                route: "certificate.index",
+                label: "Certificados",
+                icon: mdiReceiptText,
+                role: "Admin",// asegúrate de tener este permiso en Spatie
+            },
             
         ],
     },

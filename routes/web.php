@@ -23,7 +23,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\EventReviewController;
+use App\Http\Controllers\CertificateController;
+
+
 
 
 
@@ -74,9 +76,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('event-review/{event}/edit', [EventReviewController::class, 'edit'])->name('event-review.edit');
         Route::put('event-review/{event}', [EventReviewController::class, 'update'])->name('event-review.update');
     });
-    
 
-    //
+    Route::prefix('catalogs/certificates')->middleware(['auth', 'role:Admin', 'permission:certificate.index'])->group(function () {
+        Route::get('/', [CertificateController::class, 'index'])->name('certificate.index');
+        Route::get('/{event}', [CertificateController::class, 'show'])->name('certificate.show');
+        Route::post('/{event}/generate', [CertificateController::class, 'store'])->name('certificate.store');
+    });
+
+
+
+    // Catalogs
     Route::resource('article', ArticleController::class)->parameters(['article' => 'article']);
     Route::resource('articleReview', ArticleReviewController::class)->parameters(['articleReview' => 'articleReview']);
     Route::resource('paymentVoucher', PaymentVoucherController::class)->parameters(['paymentVoucher' => 'paymentVoucher']);
@@ -90,6 +99,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('/sign-pdf/{article}', [ArticleController::class, 'signPdf'])->name('article.signPdf');
+
+
+    Route::get('/eventos', [WelcomeController::class, 'events'])->name('welcome.events');
 
 });
 

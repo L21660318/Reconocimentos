@@ -9,22 +9,35 @@ import FormField from "@/Components/FormField.vue";
 import FormControl from "@/Components/FormControl.vue";
 import { mdiContentSave, mdiClose, mdiPlus } from "@mdi/js";
 import HeadLogo from "@/Components/HeadLogo.vue";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+
+
 
 const props = defineProps({
     title: String,
     routeName: String,
+    institutions: Array, // ← ¡esto es clave!
 });
+
 
 const form = useForm({
     nombre: '',
     tipo: '',
     fecha_inicio: '',
     fecha_fin: '',
+    institution_id: '',
+    imagen: null,
+    archivo_pdf: null,
 });
 
+
 const saveForm = () => {
-    form.post(route(`${props.routeName}store`));
+    form.post(route(`${props.routeName}store`), {
+        forceFormData: true,
+    });
 };
+
 </script>
 
 <template>
@@ -44,6 +57,27 @@ const saveForm = () => {
             <FormField label="Fecha de fin" :error="form.errors.fecha_fin" required>
                 <FormControl type="date" v-model="form.fecha_fin" />
             </FormField>
+            <FormField label="Institución" :error="form.errors.institution_id">
+                <v-select
+                    v-model="form.institution_id"
+                    :options="institutions"
+                    label="name"
+                    :reduce="inst => inst.id"
+                    placeholder="Buscar institución..."
+                    :searchable="true"
+                    :clearable="true"
+                />
+
+            </FormField>
+
+            <FormField label="Imagen del evento" :error="form.errors.imagen">
+                <input type="file" @change="e => form.imagen = e.target.files[0]" />
+            </FormField>
+
+            <FormField label="Archivo PDF" :error="form.errors.archivo_pdf">
+                <input type="file" @change="e => form.archivo_pdf = e.target.files[0]" />
+            </FormField>
+
 
             <template #footer>
                 <BaseButtons>

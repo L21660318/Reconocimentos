@@ -9,6 +9,9 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Inertia\Response;
 use App\Models\User;
+use App\Models\Institution;
+
+;
 
 class EventController extends Controller
 {
@@ -62,17 +65,32 @@ class EventController extends Controller
 
     public function create()
     {
-        return Inertia::render("{$this->source}Create", [
-            'title'     => 'Agregar Evento',
-            'routeName' => $this->routeName
+        return Inertia::render('Catalogs/Event/Create', [
+            'title' => 'Crear evento',
+            'routeName' => 'event.',
+            'institutions' => Institution::all(), // fuerza carga para probar
         ]);
     }
 
     public function store(StoreEventRequest $request)
     {
-        Event::create($request->validated() + ['creado_por' => auth()->id()]);
+        $data = $request->validated();
+
+        if ($request->hasFile('imagen')) {
+            $data['imagen'] = $request->file('imagen')->store('eventos/imagenes', 'public');
+        }
+
+        if ($request->hasFile('archivo_pdf')) {
+            $data['archivo_pdf'] = $request->file('archivo_pdf')->store('eventos/archivos', 'public');
+        }
+
+        $data['creado_por'] = auth()->id();
+
+        Event::create($data);
+
         return redirect()->route("{$this->routeName}index")->with('success', 'Evento creado con éxito!');
     }
+
 
     public function show(Event $event)
     {
@@ -123,4 +141,6 @@ class EventController extends Controller
     
         return redirect()->route('event.index')->with('success', 'Usuarios asignados correctamente.');
     }
+
+
 }

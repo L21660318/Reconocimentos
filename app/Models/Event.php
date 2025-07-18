@@ -15,6 +15,9 @@ class Event extends Model
         'fecha_inicio',
         'fecha_fin',
         'creado_por',
+        'institution_id',
+        'imagen',
+        'archivo_pdf',
     ];
 
     // Opcional: relación con usuario
@@ -35,6 +38,17 @@ class Event extends Model
             ->withPivot(['tipo', 'estatus', 'comentario'])
             ->withTimestamps();
     }
+    
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
 
 
 }
