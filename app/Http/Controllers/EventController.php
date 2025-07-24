@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 use Inertia\Response;
 use App\Models\User;
 use App\Models\Institution;
-
+use Illuminate\Support\Facades\Validator;
+use App\Models\EventUserRequest;
 ;
 
 class EventController extends Controller
@@ -22,7 +23,7 @@ class EventController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['register']);
         $this->source = 'Catalogs/Event/';
         $this->model = new Event();
         $this->routeName = 'event.';
@@ -141,6 +142,91 @@ class EventController extends Controller
     
         return redirect()->route('event.index')->with('success', 'Usuarios asignados correctamente.');
     }
+
+
+
+    public function register(Request $request, Event $event)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Correo no encontrado.'], 404);
+        }
+
+        // Verifica si ya hay una solicitud pendiente o aceptada
+        $exists = \DB::table('event_user_requests')
+            ->where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['pendiente', 'aceptado'])
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['message' => 'Ya se ha registrado previamente.'], 409);
+        }
+
+        // Inserta la solicitud
+        \DB::table('event_user_requests')->insert([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'status' => 'pendiente',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Registro exitoso']);
+    }
+
+    public function acceptRequest(EventUserRequest $request)
+    {
+        // Cambiar estado a aceptado
+        $request->update(['status' => 'aceptado']);
+
+        // Insertar en tabla event_user si no existe ya
+        $exists = \DB::table('event_user')->where([
+            'event_id' => $request->event_id,
+            'user_id' => $request->user_id,
+        ])->exists();
+
+        if (!$exists) {
+            \DB::table('event_user')->insert([
+                'event_id' => $request->event_id,
+                'user_id' => $request->user_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', 'Solicitud aceptada y usuario inscrito.');
+    }
+
+
+    public function rejectRequest(EventUserRequest $request)
+    {
+        $request->update(['status' => 'rechazado']);
+
+        return back()->with('success', 'Solicitud rechazada.');
+    }
+
+    
+
+    public function requests(Event $event)
+    {
+        $requests = \App\Models\EventUserRequest::with('user')
+            ->where('event_id', $event->id)
+            ->where('status', 'pendiente') // ← SOLO solicitudes pendientes
+            ->get();
+
+        return Inertia::render('Catalogs/Event/Requests', [
+            'event' => $event,
+            'requests' => $requests,
+            'title' => 'Solicitudes de inscripción',
+        ]);
+    }
+
 
 
 }

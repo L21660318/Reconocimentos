@@ -131,4 +131,9 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
     
+    public function events()
+    {
+        return $this->belongsToMany(Event::class)->withTimestamps();
+    }
+
 }

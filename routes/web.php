@@ -24,6 +24,8 @@ use Inertia\Inertia;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\EventReviewController;
+use App\Http\Controllers\MyCertificateController;
 
 
 
@@ -43,6 +45,7 @@ Route::get('/', [WelcomeController::class, 'welcome'])->name('welcome');
 Route::get('/comite', [WelcomeController::class, 'committee'])->name('welcome.committee');
 Route::get('/lugar', [WelcomeController::class, 'place'])->name('welcome.place');
 Route::get('/programa', [WelcomeController::class, 'program'])->name('welcome.program');
+Route::post('/event/{event}/register', [EventController::class, 'register'])->name('event.register');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -78,12 +81,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::prefix('catalogs/certificates')->middleware(['auth', 'role:Admin', 'permission:certificate.index'])->group(function () {
-        Route::get('/', [CertificateController::class, 'index'])->name('certificate.index');
-        Route::get('/{event}', [CertificateController::class, 'show'])->name('certificate.show');
-        Route::post('/{event}/generate', [CertificateController::class, 'store'])->name('certificate.store');
+    Route::get('/', [CertificateController::class, 'index'])->name('certificate.index');
+    Route::get('/{event}', [CertificateController::class, 'show'])->name('certificate.show');
+    Route::post('/{event}/generate', [CertificateController::class, 'store'])->name('certificate.store');
+    Route::get('/{event}/download/{user}', [CertificateController::class, 'download'])->name('certificate.download');
+    Route::get('/certificate/preview/{event}/{user}', [CertificateController::class, 'preview'])->name('certificate.preview');
     });
 
+    
+    Route::get('event/{event}/requests', [EventController::class, 'requests'])->name('event.requests');
+    Route::post('event/requests/{request}/accept', [EventController::class, 'acceptRequest'])->name('event.requests.accept');
+    Route::post('event/requests/{request}/reject', [EventController::class, 'rejectRequest'])->name('event.requests.reject');
 
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/mis-certificados', [MyCertificateController::class, 'index'])->name('my-certificates.index');
+        Route::get('/catalogs/certificates/{event}/download/{user}', [CertificateController::class, 'download'])->name('certificate.download');
+
+    });
 
     // Catalogs
     Route::resource('article', ArticleController::class)->parameters(['article' => 'article']);

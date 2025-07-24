@@ -79,7 +79,7 @@ class PermissionSeeder extends Seeder
         ]);
         Permission::firstOrCreate(['name' => 'certificate.show', 'guard_name' => 'web', 'description' => 'Ver certificado', 'module_key' => 'cat']);
         Permission::firstOrCreate(['name' => 'certificate.store', 'guard_name' => 'web', 'description' => 'Crear certificado', 'module_key' => 'cat']);
-
+        Permission::firstOrCreate(['name' => 'certificate.download', 'guard_name' => 'web', 'description' => 'Descargar certificado', 'module_key' => 'cat']);
 
 
         // DIVULGACION

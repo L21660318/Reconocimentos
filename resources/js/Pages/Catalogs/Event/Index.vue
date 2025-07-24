@@ -117,6 +117,13 @@ provide("filterBy", (order, direction) => {
                                     color="info"
                                     label="Asignar usuarios"
                                 />
+                                <a
+                                :href="route('event.requests', event.id)"
+                                target="_blank"
+                                class="btn btn-info text-sm px-2 py-1 rounded"
+                                >
+                                Ver solicitudes
+                                </a>
 
                             </BaseButtons>
                         </td>

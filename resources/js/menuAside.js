@@ -15,6 +15,7 @@ import {
     mdiReceiptText,
     mdiCalendar,
     mdiClipboardCheck,
+    mdiClipboardTextClock,
 } from "@mdi/js";
 // import Icon from '@mdi/react';
 
@@ -129,6 +130,10 @@ export default [
         icon: mdiClipboardCheck,
         permission: "event-review.index", // si usas permisos de spatie
     },
-    
-    
+
+    {
+        label: "Mis Certificados",
+        icon: mdiClipboardTextClock,
+        route: "my-certificates.index", // ← esto debe coincidir con el nombre de la ruta
+    },
 ];

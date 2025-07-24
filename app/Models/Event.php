@@ -49,6 +49,10 @@ class Event extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
+    public function userRequests()
+    {
+        return $this->hasMany(EventUserRequest::class);
+    }
 
 
 }
