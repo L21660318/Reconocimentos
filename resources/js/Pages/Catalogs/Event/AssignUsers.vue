@@ -36,7 +36,8 @@ const saveForm = () => {
 };
 
 const checkAll = () => {
-  form.users = filteredUsers.value.map((u) => u.id);
+  const idsToAdd = filteredUsers.value.map((u) => u.id);
+  form.users = Array.from(new Set([...form.users, ...idsToAdd]));
 };
 
 const uncheckAll = () => {

@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Event;
 use App\Models\Certificate;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
 class CertificateController extends Controller
@@ -22,16 +22,23 @@ class CertificateController extends Controller
 
     public function show(Event $event)
     {
-        return Inertia::render('Catalogs/Certificate/Show', [
-            'event' => $event,
-            'users' => $event->users, // Aquí ya están cargados con knowledgeArea
-            'title' => "Usuarios del evento: $event->nombre",
+        $event->load([
+            'users.knowledgeArea',
+            'users.institution.state',
+            'users.institution.country'
         ]);
 
+        return Inertia::render('Catalogs/Certificate/Show', [
+            'event' => $event,
+            'users' => $event->users,
+            'title' => "Usuarios del evento: $event->nombre",
+        ]);
     }
 
     public function store(Request $request, Event $event)
     {
+        $event->load('users'); // 👈 Cargar usuarios para usar count() en la vista
+
         $request->validate([
             'certificados' => 'required|array',
             'certificados.*.user_id' => 'required|exists:users,id',
@@ -39,33 +46,62 @@ class CertificateController extends Controller
         ]);
 
         foreach ($request->certificados as $cert) {
-            // Guardar o actualizar certificado
             $certificate = Certificate::updateOrCreate(
                 ['event_id' => $event->id, 'user_id' => $cert['user_id']],
                 ['tipo' => $cert['tipo']]
             );
 
-            // Obtener usuario
-            $user = User::with('knowledgeArea')->findOrFail($cert['user_id']);
+            $user = User::with([
+                'knowledgeArea',
+                'institution.state',
+                'institution.country'
+            ])->findOrFail($cert['user_id']);
 
-            // Generar PDF
             $pdf = Pdf::loadView('pdf.certificate', [
                 'event' => $event,
                 'user' => $user,
                 'certificate' => $certificate,
+                'institution' => $user->institution,
+                'state' => optional($user->institution)->state,
+                'country' => optional($user->institution)->country,
             ]);
 
-            // Guardar el PDF en el disco
             $filename = "certificados/{$event->id}_{$user->id}.pdf";
-            \Storage::put("public/$filename", $pdf->output());
+            Storage::put("public/$filename", $pdf->output());
 
-            // (Opcional) Guardar ruta del PDF en la base de datos
             $certificate->update([
                 'file_path' => $filename,
             ]);
         }
 
         return redirect()->back()->with('success', 'Certificados generados correctamente.');
+    }
+
+    public function preview(Event $event, User $user, Request $request)
+    {
+        $event->load('users'); // 👈 También cargar usuarios aquí
+
+        $tipo = $request->get('tipo', 'Participación');
+
+        $certificate = new \stdClass();
+        $certificate->tipo = $tipo;
+
+        $user->load([
+            'knowledgeArea',
+            'institution.state',
+            'institution.country'
+        ]);
+
+        $pdf = Pdf::loadView('pdf.certificate', [
+            'event' => $event,
+            'user' => $user,
+            'certificate' => $certificate,
+            'institution' => $user->institution,
+            'state' => optional($user->institution)->state,
+            'country' => optional($user->institution)->country,
+        ]);
+
+        return $pdf->stream("preview.pdf");
     }
 
     public function download(Event $event, User $user)
@@ -82,23 +118,6 @@ class CertificateController extends Controller
         ]);
     }
 
-    // Cambia esto en CertificateController
-    public function preview(Event $event, User $user, Request $request)
-    {
-        $tipo = $request->get('tipo', 'Participación');
-
-        $certificate = new \stdClass(); // si necesitas un objeto
-        $certificate->tipo = $tipo;
-
-        $pdf = Pdf::loadView('pdf.certificate', [  // usa la misma vista
-            'event' => $event,
-            'user' => $user,
-            'certificate' => $certificate, // para compatibilidad con la plantilla
-        ]);
-
-        return $pdf->stream("preview.pdf");
-    }
-
     public function myCertificates()
     {
         $user = auth()->user();
@@ -112,6 +131,4 @@ class CertificateController extends Controller
             'title' => 'Mis Certificados',
         ]);
     }
-
-
 }
