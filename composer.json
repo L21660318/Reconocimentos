@@ -13,8 +13,10 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "laraveles/spanish": "^1.5",
+        "phpoffice/phpword": "^1.4",
         "spatie/laravel-permission": "^6.9",
         "spatie/simple-excel": "^3.6",
+        "tecnickcom/tcpdf": "^6.10",
         "tightenco/ziggy": "^1.0"
     },
     "require-dev": {
