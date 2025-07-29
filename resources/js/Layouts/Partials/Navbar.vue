@@ -60,7 +60,7 @@ const toggleNav = () => {
                         <NavLink :active="$page.component === 'Welcome/Place/Index'" href="/lugar">Lugar</NavLink>
                     </li>
                     <li>
-                        <NavLink :active="$page.component === 'Welcome/Program/Index'" href="/programa">Programa
+                        <NavLink :active="$page.component === 'Welcome/Program/Index'" href="/programa">
                         </NavLink>
                     </li>
                 </ul>

@@ -15,7 +15,7 @@
         "@vitejs/plugin-vue": "^4.0.0",
         "autoprefixer": "^10.4.12",
         "axios": "^1.6.4",
-        "chart.js": "^4.4.3",
+        "chart.js": "^4.5.0",
         "laravel-vite-plugin": "^1.0",
         "lodash": "^4.17.21",
         "numeral": "^2.0.6",

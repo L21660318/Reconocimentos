@@ -26,10 +26,11 @@ import { mdiArrowRight  } from '@mdi/js';
                     <BaseButton label="Descubrir" color="info"/>
                     <BaseButton label="Empieza ahora" color="white" :icon="mdiArrowRight"/>
                 </BaseButtons>
-                
+
             </div>
             <div class="flex-none mt-14 md:mt-0 md:max-w-xl">
-                <img src="https://images.unsplash.com/photo-1573164713619-24c711fe7878?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1738&q=80"
+                <img src="https://vpevinimetal.com/wp-content/uploads/2021/07/diplomas-1024x683.jpg
+                "
                     class=" md:rounded-tl-[108px]" alt="" />
             </div>
         </div>
