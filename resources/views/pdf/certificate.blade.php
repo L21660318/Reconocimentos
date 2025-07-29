@@ -46,19 +46,21 @@
     <div class="certificado">
         <!-- Encabezado institucional con imágenes -->
         <div class="header">
-            <!-- Imágenes en base64 para evitar problemas de rutas en PDF -->
-            <img src="@php echo base64Image(public_path('images/secretaria.jpg')); @endphp" alt="Secretaría de Educación Pública" style="height: 40px;">
-            
-            <img src="@php echo base64Image(public_path('images/tec.jpg')); @endphp" alt="TECNOLOGICO NACIONAL DE MEXICO" style="height: 50px; margin: 10px 0;">
+            <!-- Imagen "Secretaría de Educación Pública" -->
+            <img src="{{ url('/images/secretaria.jpg') }}" alt="Secretaría de Educación Pública" style="height: 40px;">
+            <!-- Imagen "TECNOLOGICO NACIONAL DE MEXICO" -->
+            <img src="{{ asset('images/tec.jpg') }}" alt="TECNOLOGICO NACIONAL DE MEXICO" style="height: 50px; margin: 10px 0;">
 
             <div class="separator"></div>
             
+            <!-- Sección del logo cenidet -->
             <div class="logo-section">
-                <img src="@php echo base64Image(public_path('images/cenidet.jpg')); @endphp" alt="cenidet" style="height: 60px;">
+                <!-- Imagen "cenidet" -->
+                <img src="{{ asset('images/cenidet.jpg') }}" alt="cenidet" style="height: 60px;">
             </div>
         </div>
 
-        <!-- Resto del contenido (igual que antes) -->
+        <!-- Contenido del certificado -->
         <div class="content">
             <p>Por su destacada participación en el</p>
             <p><strong>{{ $event->nombre }}</strong></p>
@@ -72,8 +74,10 @@
             </p>
         </div>
 
+        <!-- Nombre del alumno -->
         <p class="participante">{{ $user->name }}</p>
 
+        <!-- Lugar y fecha del evento -->
         <p class="footer">
             {{ $state->name ?? 'Estado desconocido' }}, 
             {{ $country->name ?? 'País desconocido' }}, 
@@ -82,10 +86,12 @@
             {{ \Carbon\Carbon::parse($event->fecha_fin)->format('Y') }}
         </p>
 
+        <!-- Fecha de emisión y folio -->
         <p class="footer">Fecha de emisión: {{ now()->format('d/m/Y') }}</p>
         <p class="footer">Folio: {{ $certificate->folio ?? '---------' }}</p>
         <p class="footer">http://constancias.cenidet.tecnm.mx</p>
 
+        <!-- Sello digital -->
         <p class="footer" style="margin-top: 20px;">
             <strong>Sello Digital:</strong><br>
             {!! nl2br(e(wordwrap($certificate->sello_digital ?? '---------------', 64))) !!}
