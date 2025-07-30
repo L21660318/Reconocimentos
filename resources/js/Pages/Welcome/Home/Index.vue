@@ -34,7 +34,7 @@ const props = defineProps({
     <LayoutWelcome>
         <HeroSection>
             <template #title>
-                Fer Preciosa
+                CENIDET
             </template>
             <template #description>
                 Divulgación de la tecnología y ciencia aplicada en la solución de problemas como soberanía en salud,
