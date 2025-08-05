@@ -24,7 +24,7 @@ const props = defineProps({
         type: String,
         required: true
     }
-    
+
 });
 
 </script>
@@ -34,14 +34,14 @@ const props = defineProps({
     <LayoutWelcome>
         <HeroSection>
             <template #title>
-                CENIDET
+                Plataforma de Reconocimientos del CENIDET
             </template>
             <template #description>
-                Divulgación de la tecnología y ciencia aplicada en la solución de problemas como soberanía en salud,
-                soberanía alimentaria, soberanía energética, desarrollos socioambientales y desarrollo
-                urbano-industrial.
+                Regístrate, participa en eventos académicos y obtén reconocimientos digitales
+                validados por el CENIDET. Todo en un solo lugar, de forma segura y accesible.
             </template>
         </HeroSection>
+
         
         <Events :events="events" :search="search" />
     </LayoutWelcome>

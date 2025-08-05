@@ -26,7 +26,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\EventReviewController;
 use App\Http\Controllers\MyCertificateController;
-
+use App\Http\Controllers\UserImportController;
 
 
 
@@ -74,6 +74,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('event', EventController::class)->parameters(['event' => 'event']);
     Route::get('event/{event}/assign-users', [EventController::class, 'assignUsers'])->name('event.assignUsers');
     Route::post('event/{event}/assign-users', [EventController::class, 'storeAssignedUsers'])->name('event.storeUsers');
+    // Versión corregida (nota el plural 'events' en lugar de 'event')
+    Route::post('/events/{event}/import-users', [UserImportController::class, 'import'])
+    ->name('events.importUsers'); // Nombre en plural
+    Route::get('/download-user-template', [UserImportController::class, 'downloadTemplate'])->name('users.downloadTemplate');
     Route::middleware(['auth'])->group(function () {
         Route::get('event-review', [EventReviewController::class, 'index'])->name('event-review.index');
         Route::get('event-review/{event}/edit', [EventReviewController::class, 'edit'])->name('event-review.edit');
