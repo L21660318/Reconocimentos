@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\Institution;
 use Illuminate\Support\Facades\Validator;
 use App\Models\EventUserRequest;
+use Illuminate\Support\Facades\Storage;
+
 ;
 
 class EventController extends Controller
@@ -107,10 +109,49 @@ class EventController extends Controller
         ]);
     }
 
-    public function update(UpdateEventRequest $request, Event $event)
+    public function update(Request $request, Event $event)
     {
-        $event->update($request->validated());
-        return redirect()->route("{$this->routeName}index")->with('success', 'Evento actualizado con éxito!');
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'tipo' => 'nullable|string|max:255',
+            'descripcion' => 'nullable|string',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'institution_id' => 'nullable|exists:institutions,id',
+            'imagen' => 'nullable|file|image|mimes:jpg,jpeg,png|max:1024',
+            'archivo_pdf' => 'nullable|file|mimes:pdf|max:10240',
+        ]);
+
+        // Guardar imagen
+        if ($request->hasFile('imagen')) {
+            // Borrar imagen anterior si existe
+            if ($event->imagen) {
+                Storage::disk('public')->delete($event->imagen);
+            }
+
+            // Guardar nueva imagen
+            $nombreImagen = $request->file('imagen')->hashName();
+            $request->file('imagen')->storeAs('eventos/imagenes', $nombreImagen, 'public');
+            $data['imagen'] = "eventos/imagenes/{$nombreImagen}";
+        }
+
+        // Guardar PDF
+        if ($request->hasFile('archivo_pdf')) {
+            // Borrar PDF anterior si existe
+            if ($event->archivo_pdf) {
+                Storage::disk('public')->delete($event->archivo_pdf);
+            }
+
+            // Guardar nuevo PDF
+            $nombrePdf = $request->file('archivo_pdf')->hashName();
+            $request->file('archivo_pdf')->storeAs('eventos/archivos', $nombrePdf, 'public');
+            $data['archivo_pdf'] = "eventos/archivos/{$nombrePdf}";
+        }
+
+        // Actualizar el evento con los datos validados
+        $event->update($data);
+
+        return back()->with('success', 'Evento actualizado correctamente');
     }
 
     public function destroy(Event $event)

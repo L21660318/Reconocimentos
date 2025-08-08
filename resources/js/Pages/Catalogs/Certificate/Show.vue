@@ -5,7 +5,7 @@ import CardBox from '@/Components/CardBox.vue';
 import BaseButton from '@/Components/BaseButton.vue';
 import FormField from '@/Components/FormField.vue';
 import { router } from '@inertiajs/vue3';
-import { mdiAccountSchool, mdiSelectAll, mdiCheckboxBlankOutline, mdiEye } from '@mdi/js';
+import { mdiAccountSchool, mdiSelectAll, mdiCheckboxBlankOutline, mdiEye, mdiDownload } from '@mdi/js';
 import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
@@ -17,6 +17,7 @@ const tipo = ref('Participación');
 const selectedUsers = ref([]);
 const search = ref('');
 const previewUserId = ref(null);
+const isLoading = ref(false);
 
 // Elimina duplicados y filtra por nombre o correo
 const uniqueUsers = computed(() => {
@@ -39,23 +40,46 @@ const uncheckAll = () => {
   selectedUsers.value = selectedUsers.value.filter(id => !idsToRemove.has(id));
 };
 
-const submit = () => {
+const downloadCertificate = async (userId) => {
+  window.open(route('certificates.download', {
+    event: props.event.id,
+    user: userId,
+    tipo: tipo.value
+  }), '_blank');
+};
+
+const generateCertificates = async () => {
   if (selectedUsers.value.length === 0) {
     alert('Selecciona al menos un usuario.');
     return;
   }
 
-  const certificados = selectedUsers.value.map(user_id => ({
-    user_id,
-    tipo: tipo.value
-  }));
+  isLoading.value = true;
 
-  router.post(route('certificate.store', props.event.id), { certificados }, {
-    onError: (errors) => {
-      console.error(errors);
-      alert('Error al generar certificados');
+  try {
+    // Para un solo certificado
+    if (selectedUsers.value.length === 1) {
+      await downloadCertificate(selectedUsers.value[0]);
+      return;
     }
-  });
+
+    // Para múltiples certificados
+    const response = await router.post(route('certificates.generate.batch', props.event.id), {
+      user_ids: selectedUsers.value,
+      tipo: tipo.value
+    });
+
+    if (response?.data?.download_url) {
+      window.location.href = response.data.download_url;
+    } else {
+      alert(`Se generaron ${selectedUsers.value.length} certificados correctamente`);
+    }
+  } catch (error) {
+    console.error('Error al generar certificados:', error);
+    alert('Ocurrió un error al generar los certificados');
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const openPreview = (userId) => {
@@ -68,7 +92,11 @@ const closePreview = () => {
 
 const previewUrl = computed(() => {
   return previewUserId.value
-    ? route('certificate.preview', { event: props.event.id, user: previewUserId.value, tipo: tipo.value })
+    ? route('certificates.preview', { 
+        event: props.event.id, 
+        user: previewUserId.value, 
+        tipo: tipo.value 
+      })
     : null;
 });
 
@@ -114,52 +142,67 @@ watch(previewUserId, (val) => {
       </FormField>
 
       <div class="flex gap-2 mt-2 mb-4">
-        <BaseButton :icon="mdiSelectAll" color="info" label="Marcar todos" @click="checkAll" />
-        <BaseButton :icon="mdiCheckboxBlankOutline" color="warning" label="Desmarcar todos" @click="uncheckAll" />
+        <BaseButton 
+          :icon="mdiSelectAll" 
+          color="info" 
+          label="Marcar todos" 
+          @click="checkAll" 
+        />
+        <BaseButton 
+          :icon="mdiCheckboxBlankOutline" 
+          color="warning" 
+          label="Desmarcar todos" 
+          @click="uncheckAll" 
+        />
       </div>
 
       <div class="grid gap-2 max-h-[60vh] overflow-y-auto">
         <div
           v-for="user in uniqueUsers"
           :key="user.id"
-          class="flex items-center gap-4"
+          class="flex items-center gap-4 p-2 hover:bg-gray-50"
         >
           <input
             type="checkbox"
             :value="user.id"
             v-model="selectedUsers"
+            class="h-4 w-4 text-blue-600 rounded"
           />
-          <div>
-            <p class="font-medium">{{ user.name }}</p>
-            <p class="text-sm text-gray-500">
-              {{ user.email }}<br>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium truncate">{{ user.name }}</p>
+            <p class="text-sm text-gray-500 truncate">
+              {{ user.email }}
+            </p>
+            <p class="text-xs text-gray-400">
               Área: {{ user.knowledge_area?.name ?? 'No asignada' }}
             </p>
           </div>
 
-          <BaseButton
-            color="info"
-            label="Descargar"
-            small
-            class="ml-auto"
-            :href="route('certificate.download', { event: event.id, user: user.id })"
-            target="_blank"
-          />
-          <BaseButton
-            color="gray"
-            :icon="mdiEye"
-            label="Previsualizar"
-            small
-            @click="openPreview(user.id)"
-          />
+          <div class="flex gap-2">
+            <BaseButton
+              color="info"
+              :icon="mdiDownload"
+              label="Descargar"
+              small
+              @click="downloadCertificate(user.id)"
+            />
+            <BaseButton
+              color="gray"
+              :icon="mdiEye"
+              label="Vista previa"
+              small
+              @click="openPreview(user.id)"
+            />
+          </div>
         </div>
       </div>
 
       <BaseButton
-        class="mt-4"
+        class="mt-4 w-full"
         color="success"
-        label="Generar certificados"
-        @click="submit"
+        :label="isLoading ? 'Generando...' : `Generar ${selectedUsers.length} certificado(s)`"
+        :disabled="isLoading || selectedUsers.length === 0"
+        @click="generateCertificates"
       />
     </CardBox>
 
@@ -170,12 +213,21 @@ watch(previewUserId, (val) => {
       @click.self="closePreview"
     >
       <div class="bg-white w-[90vw] max-w-5xl h-[90vh] p-4 rounded shadow-lg overflow-hidden relative">
-        <button @click="closePreview" class="absolute top-2 right-4 text-gray-700 hover:text-red-500 text-xl">×</button>
+        <button 
+          @click="closePreview" 
+          class="absolute top-2 right-4 text-gray-700 hover:text-red-500 text-xl"
+        >
+          ×
+        </button>
         <iframe
           v-if="previewUrl"
           :src="previewUrl"
           class="w-full h-full border rounded"
+          frameborder="0"
         ></iframe>
+        <div v-else class="flex items-center justify-center h-full">
+          <p>Cargando vista previa...</p>
+        </div>
       </div>
     </div>
   </LayoutMain>

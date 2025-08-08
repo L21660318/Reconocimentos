@@ -90,18 +90,6 @@ export default [
                 permission: "institution.index",
             },
             {
-                route: "call.index",
-                label: "Convocatorias",
-                icon: mdiBullhorn,
-                permission: "call.index",
-            },
-            {
-                route: "criterion.index",
-                label: "Criterios",
-                icon: mdiFileDocumentCheck,
-                permission: "criterion.index",
-            },
-            {
                 route: "event.index",
                 label: "Eventos",
                 icon: mdiCalendar,
@@ -116,12 +104,6 @@ export default [
             },
             
         ],
-    },
-    {
-        route: "article.index",
-        label: "Artículos",
-        icon: mdiBook,
-        permission: "article.index",
     },
 
     {

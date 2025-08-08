@@ -44,38 +44,92 @@ const inscribirse = () => {
 </script>
 
 <template>
-    <div
-        class="pb-4 rounded-md border shadow-sm w-full max-w-sm group transition-all duration-200 hover:translate-y-2.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-800">
+    <div class="pb-6 rounded-xl border-2 border-gray-200/80 shadow-sm w-full max-w-sm group transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-600/50 dark:bg-gray-800/50 backdrop-blur-sm overflow-hidden hover:ring-4 hover:ring-primary-500/10 hover:border-primary-500/30">
+        <!-- Image with gradient overlay -->
+        <div class="relative overflow-hidden h-60 w-full">
+            <img 
+                :src="event.imagen ? '/storage/' + event.imagen : '/img/login-image.jpg'"
+                alt="imagen evento" 
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <!-- Date badge -->
+            <div class="absolute top-4 right-4 bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-white text-xs font-medium px-3 py-1 rounded-full shadow">
+                {{ event.fecha_inicio }}
+            </div>
+        </div>
 
-        <img :src="event.imagen ? '/storage/' + event.imagen : '/img/login-image.jpg'"
-            alt="imagen evento" class="h-60 w-full rounded-t object-cover">
-
-        <div class="px-4">
-            <div class="mt-3 text-left space-y-2">
-                <span class="text-sm font-light text-gray-800 dark:text-gray-400">{{ event.fecha_inicio }}</span>
-                <h4 class="line-clamp-2 h-14 mt-2 text-lg font-semibold group-hover:text-blue-500 text-gray-800 dark:text-white">
+        <div class="px-5">
+            <div class="mt-4 text-left space-y-2">
+                <h4 class="line-clamp-2 h-14 text-xl font-bold group-hover:text-primary-600 text-gray-800 dark:text-white transition-colors">
                     {{ event.nombre }}
                 </h4>
+                <p v-if="event.descripcion" class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">
+                    {{ event.descripcion }}
+                </p>
             </div>
 
-            <div v-if="showForm" class="mt-2 space-y-2">
-                <input
-                    v-model="email"
-                    type="email"
-                    placeholder="Tu correo"
-                    class="w-full p-2 border rounded text-sm dark:bg-gray-700 dark:text-white"
+            <!-- Registration form -->
+            <div v-if="showForm" class="mt-4 space-y-3 animate-fade-in">
+                <div>
+                    <input
+                        v-model="email"
+                        type="email"
+                        placeholder="Tu correo electrónico"
+                        class="w-full p-3 border rounded-lg text-sm dark:bg-gray-700/50 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                    />
+                </div>
+                <BaseButton 
+                    :disabled="loading" 
+                    @click="inscribirse" 
+                    label="Confirmar inscripción" 
+                    color="success" 
+                    small 
+                    class="w-full justify-center"
                 />
-                <BaseButton :disabled="loading" @click="inscribirse" label="Confirmar inscripción" color="success" small />
 
-                <!-- Mensajes -->
-                <p v-if="message" class="text-green-500 text-sm">{{ message }}</p>
-                <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+                <!-- Messages -->
+                <div v-if="message" class="p-3 bg-green-100/80 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-sm rounded-lg">
+                    {{ message }}
+                </div>
+                <div v-if="error" class="p-3 bg-red-100/80 dark:bg-red-900/50 text-red-700 dark:text-red-300 text-sm rounded-lg">
+                    {{ error }}
+                </div>
             </div>
 
-            <div class="justify-between flex mt-4 gap-2">
-                <BaseButton small :icon="mdiArrowRight" @click="$emit('openModal', event)" color="info" label="Conocer más" />
-                <BaseButton small @click="showForm = !showForm" color="primary" label="Inscribirse" />
+            <!-- Action buttons -->
+            <div class="flex mt-6 gap-3">
+                <BaseButton 
+                    small 
+                    :icon="mdiArrowRight" 
+                    @click="$emit('openModal', event)" 
+                    color="info" 
+                    label="Detalles" 
+                    class="flex-1 justify-center hover:shadow-lg"
+                />
+                <BaseButton 
+                    small 
+                    @click="showForm = !showForm" 
+                    color="primary" 
+                    :label="showForm ? 'Cancelar' : 'Inscribirse'" 
+                    class="flex-1 justify-center hover:shadow-lg"
+                />
             </div>
         </div>
     </div>
 </template>
+
+<style>
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+</style>

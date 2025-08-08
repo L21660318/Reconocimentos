@@ -12,6 +12,7 @@ import HeadLogo from "@/Components/HeadLogo.vue";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import { ref } from "vue";
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   title: String,
@@ -22,6 +23,7 @@ const props = defineProps({
 const form = useForm({
   nombre: '',
   tipo: '',
+  descripcion: '', 
   fecha_inicio: '',
   fecha_fin: '',
   institution_id: '',
@@ -40,7 +42,13 @@ const onImageChange = (e) => {
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
-    alert("El archivo no es una imagen válida (jpeg, jpg o png).");
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'El archivo no es una imagen válida (jpeg, jpg o png).',
+      showConfirmButton: false,
+      timer: 2000
+    });
     input.value = '';
     form.imagen = null;
     imagePreview.value = null;
@@ -48,7 +56,13 @@ const onImageChange = (e) => {
   }
 
   if (file.size > 1 * 1024 * 1024) {
-    alert("La imagen supera el tamaño máximo permitido de 1MB.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'La imagen supera el tamaño máximo permitido de 1MB.',
+      showConfirmButton: false,
+      timer: 2000
+    });
     input.value = '';
     form.imagen = null;
     imagePreview.value = null;
@@ -72,7 +86,13 @@ const onPdfChange = (e) => {
   if (!file) return;
 
   if (file.type !== "application/pdf") {
-    alert("El archivo no es un PDF válido.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'El archivo no es un PDF válido.',
+      showConfirmButton: false,
+      timer: 2000
+    });
     input.value = '';
     form.archivo_pdf = null;
     pdfPreview.value = null;
@@ -80,7 +100,13 @@ const onPdfChange = (e) => {
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    alert("El archivo PDF supera el tamaño máximo permitido de 10MB.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'El archivo PDF supera el tamaño máximo permitido de 10MB.',
+      showConfirmButton: false,
+      timer: 2000
+    });
     input.value = '';
     form.archivo_pdf = null;
     pdfPreview.value = null;
@@ -95,6 +121,28 @@ const onPdfChange = (e) => {
 const saveForm = () => {
   form.post(route(`${props.routeName}store`), {
     forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => {
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: 'Evento guardado correctamente',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#1f2937',
+        color: '#fff'
+      });
+    },
+    onError: () => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema al guardar el evento',
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6'
+      });
+    }
   });
 };
 </script>
@@ -122,7 +170,17 @@ const saveForm = () => {
 
       <!-- FECHA FIN -->
       <FormField label="Fecha de fin" :error="form.errors.fecha_fin" required>
-        <FormControl type="date" v-model="form.fecha_fin" />
+        <FormControl type="date" v-model="form.fecha_fin" :min="form.fecha_inicio" />
+      </FormField>
+      
+      <!-- DESCRIPCIÓN -->
+      <FormField label="Descripción" :error="form.errors.descripcion">
+        <FormControl
+          v-model="form.descripcion"
+          type="textarea"
+          placeholder="Ingrese una descripción detallada del evento..."
+          rows="5"
+        />
       </FormField>
 
       <!-- INSTITUCIÓN -->
@@ -188,8 +246,20 @@ const saveForm = () => {
       <!-- BOTONES -->
       <template #footer>
         <BaseButtons>
-          <BaseButton :routeName="`${routeName}index`" :icon="mdiClose" color="white" label="Cancelar" />
-          <BaseButton :icon="mdiContentSave" color="success" label="Guardar" type="submit" />
+          <BaseButton 
+            :routeName="`${routeName}index`" 
+            :icon="mdiClose" 
+            color="white" 
+            label="Cancelar" 
+            :disabled="form.processing"
+          />
+          <BaseButton 
+            :icon="mdiContentSave" 
+            color="success" 
+            label="Guardar" 
+            type="submit" 
+            :disabled="form.processing"
+          />
         </BaseButtons>
       </template>
     </CardBox>

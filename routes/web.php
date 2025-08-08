@@ -92,7 +92,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/certificate/preview/{event}/{user}', [CertificateController::class, 'preview'])->name('certificate.preview');
     });
 
-    
+    Route::post('/eventos/{event}/certificados/generar', [CertificateController::class, 'generateBatch'])
+        ->name('certificates.generate.batch');
+
+    Route::get('/eventos/{event}/certificados/{user}/descargar', [CertificateController::class, 'generate'])
+        ->name('certificates.download');
+        
     Route::get('event/{event}/requests', [EventController::class, 'requests'])->name('event.requests');
     Route::post('event/requests/{request}/accept', [EventController::class, 'acceptRequest'])->name('event.requests.accept');
     Route::post('event/requests/{request}/reject', [EventController::class, 'rejectRequest'])->name('event.requests.reject');
