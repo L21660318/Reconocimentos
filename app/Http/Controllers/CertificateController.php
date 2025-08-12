@@ -78,31 +78,58 @@ class CertificateController extends Controller
         return redirect()->back()->with('success', 'Certificados generados correctamente.');
     }
 
-    public function preview(Event $event, User $user, Request $request)
+    public function preview(Request $request, $eventId, $userId)
     {
-        $event->load('users'); // 👈 También cargar usuarios aquí
+        $user = User::findOrFail($userId);
+        $event = Event::findOrFail($eventId);
+        $type = $request->input('tipo', 'Por su destacada participacion en el ecvento');
+        $eventDate = \Carbon\Carbon::parse($event->fecha_fin);
 
-        $tipo = $request->get('tipo', 'Participación');
+        $templatePath = public_path('templates/Template.pdf');
+        
+        $pdf = new Fpdi();
+        $pdf->AddPage();
+        $pageCount = $pdf->setSourceFile($templatePath);
+        $templateId = $pdf->importPage(1);
+        $pdf->useTemplate($templateId);
+        
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->SetTextColor(0, 0, 0);
+        
+        // Escribir nombre del usuario en color gris
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(20, 118);
+        $pdf->Cell(0, 10, $user->name, 0, 1, 'C');
+        $pdf->SetTextColor(0, 0, 0);
+        
+        // Escribir tipo de certificado
+        $pdf->SetXY(20, 128);
+        $pdf->Cell(0, 10, 'POR SU DESTACADA PARTICIPACION EN EL EVENTO', 0, 1, 'C');
 
-        $certificate = new \stdClass();
-        $certificate->tipo = $tipo;
+        // Escribir nombre del evento
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(20, 138);
+        $pdf->Cell(0, 10, $event->nombre, 0, 1, 'C');
+        $pdf->SetTextColor(0, 0, 0);
 
-        $user->load([
-            'knowledgeArea',
-            'institution.state',
-            'institution.country'
-        ]);
+        // Escribir tipo de certificado
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->SetXY(20, 148);
+        $pdf->Cell(0, 10, ' UN REFLEJO DEL COMPROMISO INSTITUCIONAL CON EL', 0, 1, 'C');
+        $pdf->SetXY(20, 152);
+        $pdf->Cell(0, 10, 'FORTALECIMIENTO DE LA INVESTIGACION, EL DESARROLLO ', 0, 1, 'C');
+        $pdf->SetXY(20, 156);
+        $pdf->Cell(0, 10, 'ACADEMICO Y LA FORMACION DE TALENTO CIENTIFICO EN NUESTRO PAIS..', 0, 1, 'C');
+        $pdf->SetTextColor(0, 0, 0);
 
-        $pdf = Pdf::loadView('pdf.certificate', [
-            'event' => $event,
-            'user' => $user,
-            'certificate' => $certificate,
-            'institution' => $user->institution,
-            'state' => optional($user->institution)->state,
-            'country' => optional($user->institution)->country,
-        ]);
-
-        return $pdf->stream("preview.pdf");
+        // Escribir fecha
+        $pdf->SetXY(20, 200);
+        $pdf->Cell(0, 10, $eventDate->format('d/m/Y'), 0, 1, 'C');
+        
+        // Devolver el PDF para visualización en el navegador
+        return response($pdf->Output('S'))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="preview.pdf"');
     }
 
     public function download(Event $event, User $user)
@@ -235,11 +262,12 @@ class CertificateController extends Controller
         // URL pública para descargar el ZIP
         $publicUrl = Storage::disk('public')->url($zipFileName);
         
+        // Devuelve una respuesta JSON pura con el enlace de descarga
         return response()->json([
             'message' => 'Certificados generados correctamente',
             'count' => count($userIds),
-            'download_url' => $publicUrl
-        ]);
+            'download_url' => Storage::disk('public')->url($zipFileName)
+        ], 200, [], JSON_UNESCAPED_SLASHES);
     }
 
     // Función auxiliar para generar certificados individuales
